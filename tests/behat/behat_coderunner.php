@@ -24,8 +24,30 @@
 
 
 use Behat\Mink\Exception\ExpectationException as ExpectationException;
+use Moodle\BehatExtension\Exception\SkippedException;
+
 
 class behat_coderunner extends behat_base {
+
+    /**
+     * This step looks to see if there is information about a JOBE configuration
+     * for testing. If there is, it sets CodeRunner up to use that. If not,
+     * it skips this scenario.
+     *
+     * @When /^I set CodeRunner to us the test configuration$/
+     */
+    public function i_set_coderunner_to_use_the_test_configuration() {
+        // The require_once is here, this file may be required by behat before including /config.php.
+        require_once(__DIR__ . '/../coderunnertestcase.php');
+
+        if (!qtype_stack_test_config::is_test_config_available()) {
+            throw new SkippedException('To run the CodeRunner tests, ' .
+                    ' you must define a test JOBE configuration.');
+        }
+
+        qtype_coderunner_testcase::setup_test_sandbox_configuration();
+    }
+
     /**
      * Checks that a given string appears within a visible ins or del element
      * that has a background-color attribute that is not 'inherit'.
